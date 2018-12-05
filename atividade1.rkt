@@ -39,23 +39,33 @@
 ;;Utilizando contratos para limitar inputs
 ;;links utilizados: beautifulracket.com/explainer/contracts.html
 ;; e docs.racket-lang.org/reference/function-contracts.html
-;;Forçando que o @x seja um numero, que o @y seja um número positivo
-;; e que a funcao retorne um numero
+;;Forçando que o @x e @y sejam números e que a funcao retorne um número
+
+;;versao nativa para comparacao nos testes unitarios
 (define/contract
   (potenciaNativa x y)
-  (number? (and/c number? positive?) . -> . number?)
+  (number? (and/c number?) . -> . number?)
   (expt x y))
 
 (define/contract
   (potenciaCustom x y)
-  (number? (and/c number? positive?) . -> . number?)
-  (if (= y 1) x 
-      (* x 
-         (potenciaCustom x 
-                         (- y 1)))))
+  (number? (and/c number?) . -> . number?)
+  (cond
+    [(= y 1) x]
+    [(= y 0) 1]
+    [(> y 1) (* x (potenciaCustom x (- y 1)))] ;;utilizando o expoente como contador da recursão
+    [(< y 0) (/ 1 (potenciaCustom x (- 0 y)))]
+    ;;explicando a gambiarra acima: se for menor que 0, eu divido por 1 e rodo a funcao
+    ;;pelo módulo do expoente
+    ;;exemplificando: 2⁻² => 1/2² => 1/4
+  ))
 
 ;;escrevendo testes de unidade para a funcao de potenciaCustom
 ;;material de referencia: docs.racket-lang.org/rackunit/api.html#%28part._.Overview_of_.Rack.Unit
 (test-begin 
  "Teste - questao 8"
- (check-eqv? (potenciaCustom 2 8) (potenciaNativa 2 8) "Valor retornado diferente do esperado"))
+ (check-eqv? (potenciaCustom 2 8) (potenciaNativa 2 8) "Valor retornado diferente do esperado")
+ (check-eqv? (potenciaCustom 6 0) (potenciaNativa 6 0) "Valor retornado diferente do esperado")
+ (check-eqv? (potenciaCustom 7 -2) (potenciaNativa 7 -2) "Valor retornado diferente do esperado")
+ "Testes questão 8 - OK"
+ )
