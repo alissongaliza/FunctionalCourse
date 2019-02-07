@@ -116,8 +116,8 @@
 (define (pertence? x lst)
   (cond
     [(empty? lst) #f]
-    [(equal? (first lst) x) (rest lst)]
-    [else (cons (first lst) (remove-primeiro x (rest lst)))]
+    [(equal? (first lst) x) #t]
+    [else (pertence? x (rest lst))]
     )
   )
 
@@ -139,7 +139,14 @@
 ;; elemento de cada par vem de l1 e o segundo de l2. O número de pares deve ser igual ao
 ;; tamanho da menor lista. Veja os testes para exemplos.
 (define (combine l1 l2)
-  '())
+  (cond
+    [(empty? l1) '()]
+    [(empty? l2) '()]
+    [else (cons
+            (list (first l1) (first l2))
+            (combine (rest l1) (rest l2)))]
+  )
+)
 
 (define-test-suite test-combine
   (test-equal? "listas de mesmo tamanho"
@@ -177,7 +184,13 @@
 ;; necessariamente na mesma ordem, e #f caso exista algum elemento que pertence
 ;; a um mas não a outro.
 (define (conjunto=? c1 c2)
-  0)
+  (cond
+    [(and (empty? c1) (empty? c2)) #t]
+    [(and (empty? c1) (not (empty? c2))) #f]
+    [(pertence? (first c1) c2) (conjunto=? (rest c1) (remove-primeiro (first c1) c2))]
+    [else #f]
+  )
+)
 
 (define-test-suite test-conjunto=?
   (test-true  "conjuntos vazios"        (conjunto=? '() '()))
@@ -304,9 +317,9 @@
              test-remove-primeiro
              test-remove-todos
              test-remove-heterogeneo
-             ;;test-pertence?
-             ;;test-combine
-             ;;test-conjunto=?
+             test-pertence?
+             test-combine
+             test-conjunto=?
              ;;test-remove-duplicatas
              ;;test-uniao
              ;;test-interseccao
