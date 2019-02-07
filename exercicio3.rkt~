@@ -213,11 +213,7 @@
 ;; (remove-duplicatas lst) retorna uma lista com os mesmos elementos de lst mas
 ;; sem que nenhum item ocorra mais de uma vez.
 (define (remove-duplicatas lst)
-  (cond
-    [(empty? lst) '()]
-    [else (cons (first lst) (remove-duplicatas (remove-todos (first lst) (rest lst))))]
-  )
-)
+  '())
 
 ;; Um outro nome para a mesma função poderia ser lista->conjunto, enfatizando a
 ;; sua aplicação na criação de conjuntos a partir de listas. Nesse caso podemos
@@ -250,14 +246,7 @@
 ;; Escreva a função uniao tal que
 ;; (uniao c1 c2) retorna um conjunto contendo os elementos de c1 e c2, sem duplicações.
 (define (uniao c1 c2)
-  (cond
-    [(and (empty? c1) (empty? c2)) '()]
-    [(empty? c2) c1]
-    [(not(empty? c1)) (cons (first c1) (remove-todos (first c1) (uniao (rest c1) c2)))]
-    [(empty? c1) c2]
-  )
-  
-)
+  '())
 
 ;; Dica: com o que vimos até agora tem pelo menos duas maneiras de escrever essa função.
 ;; Uma forma é uma função recursiva que tem que eliminar itens duplicados a cada passo.
@@ -287,13 +276,7 @@
 ;; (interseccao c1 c2) retorna um conjunto contendo os elementos que ocorrem
 ;; em ambos c1 e c2
 (define (interseccao c1 c2)
-  (cond
-    [(or (empty? c1) (empty? c2)) '()]
-    [(if (pertence? (first c1) c2)
-         (cons (first c1) (interseccao (rest c1) c2))
-         (interseccao (rest c1) c2))]
-  )
-)
+  '())
 
 (define-test-suite test-interseccao
   (test-equal? "Conjuntos vazios"        (interseccao '()      '())      '())
@@ -337,7 +320,7 @@
              test-pertence?
              test-combine
              test-conjunto=?
-             test-remove-duplicatas
-             test-uniao
-             test-interseccao
+             ;;test-remove-duplicatas
+             ;;test-uniao
+             ;;test-interseccao
              ))
