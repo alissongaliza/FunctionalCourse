@@ -1,64 +1,5 @@
 #lang racket
-
-(define (soma-lista lst)
-  (if (empty? lst) 0
-      (+ (first lst) (soma-lista (rest lst)))))
-
-#|
-
-Pelo modelo de substituicao:
-
-(soma-lista (list 3 5 2))
- = (+ 3 (soma-lista '(5 2)))
- = (+ 3 (+ 5 (soma-lista '(2))))
- = (+ 3 (+ 5 (+ 2 (soma-lista '()))))
- = (+ 3 (+ 5 (+ 2 0)))
- = (+ 3 (+ 5 2))
- = (+ 3 7)
- = 10
-
-|#
-
-(define (pertence? x lst)
-  (cond [(empty? lst) #f]
-        [(equal? x (first lst)) #t]
-        [else (pertence? x (rest lst))]))
-
-#|
-
-(pertence? 3 (lista 1 4 5 7))
- = (pertence? 3 '(4 5 7))
- = (pertence? 3 '(5 7))
- = (pertence? 3 '(7))
- = (pertence? 3 '())
- = #f
-
-
-|#
-
-
-
-(define (soma-lista-2 lst)
-  (define (soma-lista-acc lst acc)
-    (if (empty? lst)
-        acc
-        (soma-lista-acc (rest lst) (+ (first lst) acc))))
-  (soma-lista-acc lst 0))
-
-#|
-
-(soma-lista-acc '(3 5 2) 0)
- = (soma-lista-acc '(5 2) (+ 3 0))
- = (soma-lista-acc '(5 2) 3)
- = (soma-lista-acc '(2) (+ 5 3))
- = (soma-lista-acc '(2) 8)
- = (soma-lista-acc '() (+ 2 8))
- = (soma-lista-acc '() 10)
- = 10
-
-
-|#
-
+(require rackunit rackunit/text-ui)
 
 ;; --- Exercício 2.1 ---------------------
 
@@ -84,7 +25,7 @@ Pelo modelo de substituicao:
 ;; Crie uma função recursiva soma-lista (abaixo) que, dada uma lista de números,
 ;; calcula a soma dos números contidos
 
-(define (soma-lista-2 lst)
+(define (soma-lista lst)
   (define (soma-lista-acc lst acc)
     (if (empty? lst)
         acc
@@ -138,3 +79,68 @@ Pelo modelo de substituicao:
   (test-equal? "maximo de lista com numeros" (max-lista (list 8 55 13 24 45))    55)
   (test-equal? "maximo não muda com ordem"   (max-lista (list 45 13 8 55 24))    55))
   (test-equal? "maximo de lista com zeros"   (max-lista (list 1 0 13 0 356 0))   356)
+
+;; --- Exercício 2.12 --------------------
+
+;; Muitas vezes precisamos transformar os elementos de uma lista da mesma
+;; maneira. Escreva a função quadrado-lista (abaixo) que, dada uma lista de
+;; números, obtém uma lista contendo o quadrado de cada número da lista
+;; original (nas mesmas posições)
+(define (quadrado-lista l)
+  (define (quadrado-lista l current)
+    (if (empty? l)
+        current
+        (quadrado-lista (rest l) (append current (list(* (first l)(first l)))) )
+        )
+    )
+  (quadrado-lista l '())
+  )
+
+(define-test-suite testes-quadrado-lista
+  (test-equal? "quadrado da lista vazia"  (quadrado-lista '())        '())
+  (test-equal? "quadrado de um número"    (quadrado-lista '(5))       '(25))
+  (test-equal? "quadrado de números"
+               (quadrado-lista (list 2 5 12 25))
+               (list 4 25 144 625)))
+
+
+;; --- Exercício 2.13 --------------------
+
+;; Agora vamos selecionar itens em uma lista. Crie uma função filtra-par (abaixo)
+;; que, dado uma lista de números naturais, retorna uma outra lista contendo apenas
+;; os números pares da lista original. Use a função par definida no exercício 3
+
+(define (par n)
+  (if (= n 0) #t (if (negative? n) #f (par (- n 2)))))
+
+
+(define (filtra-par l)
+  (define (filtra-par l current)
+    (if (empty? l) current
+        (if (par (first l))
+            (filtra-par (rest l) (append current (list (first l))))
+            (filtra-par (rest l) current)
+            )))
+  (filtra-par l '())
+  )
+  
+
+(define-test-suite testes-filtra-par
+  (test-equal? "filtragem da lista vazia"     (filtra-par '())                  '())
+  (test-equal? "filtragem de lista sem pares" (filtra-par (list 1 3 5 7 9))     '())
+  (test-equal? "filtragem de lista com pares" (filtra-par (list 1 2 3 4 5))     (list 2 4))
+  (test-equal? "filtragem com todos os itens pares"
+               (filtra-par (list 2 4 22 144))
+               (list 2 4 22 144)))
+
+
+;; --- Executa todos os testes ---------
+(run-tests
+ (test-suite "todos os testes"
+             testes-mult
+             testes-soma-lista
+             testes-mult-lista
+             testes-max-lista
+             testes-quadrado-lista
+             testes-filtra-par
+             ))
