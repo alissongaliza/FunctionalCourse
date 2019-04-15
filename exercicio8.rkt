@@ -68,12 +68,12 @@
 ;; e retornar o valor de e2.
 
 (define (msg-n str n) 
-    (cond 
-        [(not(zero? n))   (msg-n str (- n 1))
-                          (printf (string-append str " ~a") n)
-                          (newline)]
-        )
+  (cond 
+    [(not(zero? n))   (msg-n str (- n 1))
+                      (printf (string-append str " ~a") n)
+                      (newline)]
     )
+  )
 (msg-n "Mensagem" 5)
 
     
@@ -107,8 +107,8 @@
 
 (define (msg-n-for str n)
   (for ([i (in-range n)])
-  (printf (string-append str " ~a") (+ 1 i))
-  (newline)
+    (printf (string-append str " ~a") (+ 1 i))
+    (newline)
     )
   )
 (msg-n-for "Mensagem com for" 5)
@@ -135,12 +135,14 @@
 (define (print-vector v)
   (for ([i (in-range (vector-length v))])
     (displayln (vector-ref v i))))
+(print-vector (vector 1 2 3))
 
 ;; E a função a seguir altera todos os elementos de
 ;; um vetor para o número zero:
 (define (zero-vector v)
   (for ([i (in-range (vector-length v))])
     (vector-set! v i 0)))
+(zero-vector (vector 1 2 3 4))
 
 ;; Às vezes é necessário transformar um vetor, passando cada elemento para uma
 ;; função de transformação, como fizemos com map, mas alterando o valor dos
@@ -150,7 +152,8 @@
 ;; A função não deve retornar um novo array com os elementos transformados,
 ;; mas sim atribuir ao próprio vetor v os elementos transformados.
 (define (vector-map! f v)
-  (void))
+  (for ([i (in-range (vector-length v))])
+    (vector-set! v i (f (vector-ref v i)))))
 
 ;; O teste de vector-map! deve criar um novo vector com valores conhecidos
 ;; (let é uma forma especial para criar variáveis temporárias), chamar a
@@ -189,7 +192,7 @@
 (define (soma-vetor v)
   (define soma 0)
   (for ([i (in-range (vector-length v))])
-    (void))      ;; alterar
+    (set! soma (+ (vector-ref v i) soma)))
   soma)
 
 (define-test-suite test-soma-vetor
@@ -229,6 +232,10 @@
             ([x vec])      ;; x é a variável do loop, em cada iteração x será um elemento de vec
     (+ soma x)))           ;; expressão que atualiza o valor do acumulador para a próxima iteração
 
+(define-test-suite test-soma-fold
+  (test-equal? "tudo zero" (soma-vetor-fold (vector 0 0)) 0)
+  )
+
 ;; Ou seja, soma começa como 0 e em cada iteração do loop ela é atualizada para
 ;; ter valor igual a (+ soma x), onde x é o próximo elemento do vetor. for/fold
 ;; retorna o valor da redução, por isso não precisamos usar nenhuma atribuição
@@ -240,6 +247,35 @@
 ;; c) a concatenação de todas as strings de um vetor de strings
 ;; d) a maior string em um vetor de strings
 ;; Escreva testes para essas funções.
+
+(define (produto-vetor-fold vec)
+  (for/fold ([produto 1])
+            ([x vec])
+    (* produto x)))
+
+(define (menorElemento-vetor-fold vec)
+  (for/fold ([menor +inf.0])
+            ([x vec])
+    (if (< x menor) (begin (set! menor x) menor) menor)))
+
+(define (concatString-vetor-fold vec)
+  (for/fold ([palavra ""])
+            ([x vec])
+    (string-append palavra x)))
+
+(define (menorPalavra-vetor-fold vec)
+  (for/fold ([menor +inf.0])
+            ([x vec])
+    (if (< (string-length x) (if (number? menor) menor (string-length menor))) (begin (set! menor x) menor) menor)))
+
+(define-test-suite test-for/fold
+  (test-equal? "produto com zero" (produto-vetor-fold (vector 0 2 3 4)) 0)
+  (test-equal? "produto" (produto-vetor-fold (vector 1 2 3 4)) 24)
+  (test-equal? "menor elemento" (menorElemento-vetor-fold (vector 45 2 3 0)) 0)
+  (test-equal? "concatString" (concatString-vetor-fold (vector "ta" "certa" "a" "indignação")) "tacertaaindignação")
+  (test-equal? "menor palavra" (menorPalavra-vetor-fold (vector "ta" "certa" "a" "indignação")) "a")
+  )
+
 
 ;; Existem outros loops for além de for/fold, veja na documentação em
 ;; https://docs.racket-lang.org/guide/for.html
@@ -303,10 +339,30 @@
 ;; que pode ser positivo ou negativo.
 ;; Escreva uma função que calcula e retorna a soma de todos os números no arquivo.
 ;; O resultado deve ser 510. 
+(define arq (open-input-file "input1.txt"))
+(define v1 (read arq))
+(define soma 0)
+(define x 0)
+(define (le-linha arq)
+  (+ soma (set! x (if (eof-object? (read arq)) 0   
+  )
+;;(for ([n (read arq)])
+;;  (if (eof-object? n) (displayln "EOF") (displayln n)))
+;;(let ((line (read-line "input1.txt" 'any)))
+;;    (unless (eof-object? line)
+;;      (displayln line)
+;;      (next-line-it file)))
+(close-input-port arq)
+;;(for ([i (in-range n)])
+;;    (printf (string-append str " ~a") (+ 1 i))
+;;    (newline)
+;;    )
 
 
 ;; Executa os testes
 (run-tests
  (test-suite "todos os testes"
              test-vector-map!
-             test-soma-vetor))
+             test-soma-vetor
+             test-soma-fold
+             test-for/fold))
