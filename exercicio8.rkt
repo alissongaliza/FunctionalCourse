@@ -340,23 +340,24 @@
 ;; Escreva uma função que calcula e retorna a soma de todos os números no arquivo.
 ;; O resultado deve ser 510. 
 (define arq (open-input-file "input1.txt"))
-(define v1 (read arq))
-(define soma 0)
-(define x 0)
+
+
 (define (le-linha arq)
-  (+ soma (set! x (if (eof-object? (read arq)) 0   
+  (define x 0)
+  (define (le-linha-acc arq acc)
+    (set! x (read arq))
+    (cond
+      [(eof-object? x) acc]
+      [else (le-linha-acc arq (+ acc x))])
+    )
+  (le-linha-acc arq 0)
   )
-;;(for ([n (read arq)])
-;;  (if (eof-object? n) (displayln "EOF") (displayln n)))
-;;(let ((line (read-line "input1.txt" 'any)))
-;;    (unless (eof-object? line)
-;;      (displayln line)
-;;      (next-line-it file)))
+
+
+(test-begin
+ (test-equal? "Soma correta input1.txt" (le-linha arq) 510))
+
 (close-input-port arq)
-;;(for ([i (in-range n)])
-;;    (printf (string-append str " ~a") (+ 1 i))
-;;    (newline)
-;;    )
 
 
 ;; Executa os testes
